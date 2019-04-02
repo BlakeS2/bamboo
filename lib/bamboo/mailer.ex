@@ -13,6 +13,44 @@ defmodule Bamboo.Mailer do
 
   [available-adapters]: https://github.com/thoughtbot/bamboo/tree/master/lib/bamboo/adapters
   [getting-started]: https://hexdocs.pm/bamboo/readme.html#getting-started
+
+  ## Example
+
+  Creating a Mailer is as simple as defining a module in your application and
+  using the `Bamboo.Mailer`.
+
+      # some/path/within/your/app/mailer.ex
+      defmodule MyApp.Mailer do
+        use Bamboo.Mailer, otp_app: :my_app
+      end
+
+  The mailer requires some configuration within your application.
+
+      # config/config.exs
+      config :my_app, MyApp.Mailer,
+        adapter: Bamboo.MandrillAdapter, # Specify your preferred adapter
+        api_key: "my_api_key" # Specify adapter-specific configuration
+
+  Also you will want to define an email module for building email structs that
+  your mailer can send. See [`Bamboo.Email`] for more information.
+
+      # some/path/within/your/app/email.ex
+      defmodule MyApp.Email do
+        import Bamboo.Email
+
+        def welcome_email do
+          new_email(
+            to: "john@example.com",
+            from: "support@myapp.com",
+            subject: "Welcome to the app.",
+            html_body: "<strong>Thanks for joining!</strong>",
+            text_body: "Thanks for joining!"
+          )
+        end
+      end
+
+  You are now able to send emails with your mailer module where you sit fit
+  within your application.
   """
 
   @cannot_call_directly_error """

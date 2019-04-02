@@ -3,7 +3,7 @@ defmodule Bamboo.SentEmailApiPlug do
   alias Bamboo.SentEmail
 
   @moduledoc """
-  A plug that to expose delivered emails over a JSON API.
+  A plug that exposes delivered emails over a JSON API.
 
   This is useful for an integration test runner that doesn't have
   access to the `Bamboo.Test` helpers, but needs to be able to assert that
