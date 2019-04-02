@@ -63,6 +63,10 @@ defmodule Bamboo.Mailer do
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
       @spec deliver_now(Bamboo.Email.t()) :: Bamboo.Email.t()
+      def deliver_now(email, inline_image_id) do
+        config = build_config()
+        Bamboo.Mailer.deliver_now(config.adapter, email, config, inline_image_id)
+      end
       def deliver_now(email) do
         config = build_config()
         Bamboo.Mailer.deliver_now(config.adapter, email, config)
@@ -113,6 +117,18 @@ defmodule Bamboo.Mailer do
   end
 
   @doc false
+  def deliver_now(adapter, email, config, inline_image_id) do
+    email = email |> validate_and_normalize(adapter)
+
+    if email.to == [] && email.cc == [] && email.bcc == [] do
+      debug_unsent(email)
+    else
+      debug_sent(email, adapter)
+      adapter.deliver(email, config, inline_image_id)
+    end
+
+    email
+  end
   def deliver_now(adapter, email, config) do
     email = email |> validate_and_normalize(adapter)
 
@@ -141,23 +157,19 @@ defmodule Bamboo.Mailer do
   end
 
   defp debug_sent(email, adapter) do
-    Logger.debug(fn ->
-      """
-      Sending email with #{inspect(adapter)}:
+    Logger.debug("""
+    Sending email with #{inspect(adapter)}:
 
-      #{inspect(email, limit: 150)}
-      """
-    end)
+    #{inspect(email, limit: :infinity)}
+    """)
   end
 
   defp debug_unsent(email) do
-    Logger.debug(fn ->
-      """
-      Email was not sent because recipients are empty.
+    Logger.debug("""
+    Email was not sent because recipients are empty.
 
-      Full email - #{inspect(email, limit: 150)}
-      """
-    end)
+    Full email - #{inspect(email, limit: :infinity)}
+    """)
   end
 
   defp validate_and_normalize(email, adapter) do
